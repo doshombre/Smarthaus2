@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ESP32 WebSocket Echo Tester</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; background: #121212; color: #e0e0e0; }
+    input, button { padding: 0.5em; margin: 0.5em 0; width: 100%; }
+    #log { height: 200px; overflow-y: scroll; background: #1e1e1e; padding: 1em; border-radius: 5px; }
+    .msg { margin: 0.2em 0; }
+    .sent { color: #4fc3f7; }
+    .received { color: #81c784; }
+    .error { color: #ef5350; }
+  </style>
+</head>
+<body>
+
+  <h2>ESP32 WebSocket Tester</h2>
+  <label>WebSocket URL (ws://...):</label>
+  <input id="wsUrl" type="text" value="ws://192.168.81.64/ws" />
+  <button onclick="connectWS()">Connect</button>
+
+  <div id="status">Not connected</div>
+
+  <label>Message to send:</label>
+  <input id="message" type="text" />
+  <button onclick="sendMessage()">Send</button>
+
+  <h3>Log</h3>
+  <div id="log"></div>
+
+  <script>
+    let ws;
+function sendPinCommand(pin, state) {
+  const msg = JSON.stringify({ pin, state });
+  ws.send(msg);
+  log(`➡ pin ${pin} => ${state}`, 'sent');
+}
+
+    function log(msg, type = '') {
+      const el = document.createElement('div');
+      el.className = 'msg ' + type;
+      el.textContent = msg;
+      document.getElementById('log').appendChild(el);
+      document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+    }
+
+    function connectWS() {
+      const url = document.getElementById('wsUrl').value;
+      ws = new WebSocket(url);
+
+      ws.onopen = () => {
+        document.getElementById('status').textContent = '✅ Connected';
+        log('Connected to ' + url);
+      };
+
+      ws.onmessage = (event) => {
+        log('⬅ ' + event.data, 'received');
+      };
+
+      ws.onerror = (error) => {
+        log('WebSocket error!', 'error');
+      };
+
+      ws.onclose = () => {
+        document.getElementById('status').textContent = '🔌 Disconnected';
+        log('Disconnected from ' + url, 'error');
+      };
+    }
+
+    function sendMessage() {
+      const msg = document.getElementById('message').value;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(msg);
+        log('➡ ' + msg, 'sent');
+      } else {
+        log('Not connected.', 'error');
+      }
+    }
+  </script>
+<button onclick="sendPinCommand(22, 1)">LED ON</button>
+<button onclick="sendPinCommand(22, 0)">LED OFF</button>
+
+</body>
+</html>
