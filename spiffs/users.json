@@ -1,0 +1,5 @@
+[
+  {"user": "Georgi", "pass": "4b0ea409da2cde44b45644bd66dfd667d641fcd9", "Userrolle": "admin","email": "g.dimitrov@mail.de"},
+  {"user": "Elitsa", "pass": "2518a60e5ed9680e14e8aa6fbeb7f916b8a25071", "Userrolle": "user", "email": "Elitsa@local"},
+  {"user": "Lyublena", "pass": "e629b025be049c0aa83d12cd34980c6d4be00249", "Userrolle": "user", "email": "Lyublena@local"}
+]

@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html>
+<meta charset = "UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="main.css" rel="stylesheet" type="text/css">  
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f1f1f1;
+}
+
+#regForm {
+  background-color: #ffffff;
+  margin: 100px auto;
+  font-family: Raleway;
+  padding: 40px;
+  width: 70%;
+  min-width: 300px;
+}
+
+h1 {
+  text-align: center;  
+}
+
+input {
+  padding: 2px;
+  /*width: 100%;*/
+  font-size: 12px;
+  font-family: Raleway;
+  border: 1px solid #aaaaaa;
+}
+.fOpen {
+  padding: 2px;
+  font-size: 12px;
+  font-family: Raleway;
+  border: 1px solid #aaaaaa;
+}
+/* Mark input boxes that gets an error on validation: */
+input.invalid {
+  background-color: #ffdddd;
+}
+
+/* Hide all steps by default: */
+.tab {
+  display: none;
+}
+
+button {
+  background-color: #04AA6D;
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: Raleway;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+#prevBtn {
+  background-color: #bbbbbb;
+}
+
+/* Make circles that indicate the steps of the form: */
+.step {
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbbbbb;
+  border: none;  
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.5;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+/* Mark the steps that are finished and valid: */
+.step.finish {
+  background-color: #04AA6D;
+}
+
+.container {
+  position: relative;top:-18px;left:10px; width:90%;height: 532px;
+	border: 1px solid #000;overflow: hidden;
+  margin:20px; 
+	background-color:rgb(100, 100, 100);
+	resize: both;
+
+}
+.trennen{
+  position: relative;float:left;
+  padding: 4px 0;
+	border-right: 2px dotted  #000;
+  padding-left:10px; 
+  padding-right:10px; 
+	background-color:rgb(200, 200, 200); 
+	height:33px;
+}
+.bar{
+	background-color:rgb(200, 200, 200);  
+		height:33px;
+}
+</style>
+<body>
+<input type="hidden" id="BenIndx" value="0">
+<div id="regForm">
+  <h1>Wizard:</h1>
+  <!-- One "tab" for each step in the form: -->
+  <div class="tab">Adminpasswort ändern:
+    <p><input placeholder="Pass..." oninput="this.className = ''" name="auname"></p>
+    <p><input placeholder="wiederholt Pass..." oninput="this.className = ''" name="apword" type="password"></p>
+ </div>
+  <div class="tab">Benutzer:
+    <p><input placeholder="Username..." oninput="this.className = ''" name="uname" id="Benutzer"></p>
+    <p><input placeholder="Password..." oninput="this.className = ''" name="pword" type="password" id="Password"></p>
+    <p><button type="button" onclick="HinBenutzer()">Hinzufügen</button>&nbsp;<button type="button" onclick="LoadBenutzer()">Load</button></p>
+    <p>
+      <table id="BenTable">
+        <tr>
+          <th>Name</th>
+          <th>Pass</th>
+          <th></th>
+        </tr>
+      </table>
+    </p>
+    
+ </div>
+  <div class="tab">
+    Dashboard editor
+    <div class="hauptcontainer">
+      <div class="bar">
+      <div class="trennen">
+      <select name="elements" id="ddlElements" onchange="onElementChange()">
+        <option value="select">--Object wählen!--</option> 
+        <option value="box">Box</option>
+        <option value="button">Button</option>
+        <option value="dimmer">Dimmer</option>
+        <option value="slider">Slider</option>
+        <option value="tf">Textfeld</option>
+      </select>
+      &nbsp;      &nbsp;      
+      <select name="sBenutzer" id="sBenutzer">
+        <option value="">--Benutzer wählen!--</option>
+      </select>
+    </div>
+
+      
+    <div class="trennen">
+      <button id="download-file">Load</button>
+
+    </div>
+    <div class="trennen">
+      <button type="button" textContent="Upload" onclick="sendFile()" >Upload</button>
+    </div>
+    <div class="trennen">
+      <span id="message" style="color:red;">tt</span>
+    </div>
+    </div>
+    <hr>
+      <div style="visibility: hidden;margin-top: -auto;float:left;width:100%;" name="boxes"  id="Boxes1">
+      <select name="elementSize" id="ddlElementSize" onchange="onSizeChange()" >
+        <option value="128x128">size 128x128</option>
+        <option value="128x256">size 128x256</option>
+        <option value="256x128">size 256x128</option>
+        <option value="256x256">size 256x256</option>
+      </select>
+      <input type="text" placeholder="Beschreibung" maxlength="16" size="15" width="50px" value="&nbsp;" id="txtBereichName">
+      <input type="color"  id="favcolor" name="favcolor" value="#275796">
+      <button id="b1">create</button>
+      </div>
+      <br> 
+      <div style="visibility: hidden; margin-top: -26px;float:left;width:100%;" name="button"  id="button">
+      <div style="float:left">      
+        <input type="text" placeholder="Beschreibung" maxlength="10" size="10" id="btnName">
+        <select name="elementBild" id="ddlBild"  >
+          <option value="Lampe">Lampe</option>
+          <option value="dose">Steckdose</option>
+          <option value="Luefter">Lüfter</option>
+        </select>
+      </div> 
+      <div style="margin-left:10px;float:left">
+        <input type="hidden" id="btnID" name="btnID" value="0">
+        <input type="text" placeholder="LED Befehl" id="LedCmd" maxlength="7" size="7" >
+        <input type="text" placeholder="MA" id="LedModul" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57' >
+        <input type="text" placeholder="Port" id="LedPort" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+        <input type="text" placeholder="DataSize"  id="LedData" maxlength="5" size="5" >
+        <br/>
+        <input type="text" placeholder="Button Befehl" id="btnCommand" maxlength="7" size="7" >
+        <input type="text" placeholder="MA" id="btnModul" maxlength="2" value="" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57' >
+        <input type="text" placeholder="Port" id="btnPort" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57' >
+        <input type="text" placeholder="Action" id="btnAction" maxlength="7" size="7" >
+        
+        <button id="b2">create</button>
+        <button id="b2_1">edit</button>
+      </div>
+      </div> 
+	  <br> 
+      <div style="visibility: hidden; margin-top: -46px;float:left;width:100%;" name="dimmer"  id="dimmer">
+      <div style="float:left">      
+        <input type="text" placeholder="Beschreibung" maxlength="10" size="10" id="dimName">
+        <select name="elementBild" id="ddlBild2"  >
+          <option value="Lampe">Lampe</option>
+          <option value="dose">Steckdose</option>
+          <option value="Luefter">Lüfter</option>
+        </select>
+      </div> 
+      <div style="margin-left:10px;float:left">
+        <input type="hidden" id="dimID" name="dimID" value="0">
+        <input type="text" placeholder="LED Befehl" id="LedCmd2" maxlength="7" size="7" >
+        <input type="text" placeholder="MA" id="LedModul2" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57' >
+        <input type="text" placeholder="Port" id="LedPort2" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+        <input type="text" placeholder="DataSize"  id="LedData2" maxlength="5" size="5" >
+        <br/>
+        <input type="text" placeholder="Button Befehl" id="dimCommand" maxlength="7" size="7" >
+        <input type="text" placeholder="MA" id="dimModul" maxlength="2" value="" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57' >
+        <input type="text" placeholder="Port" id="dimPort" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57' >
+		<input type="text" placeholder="Step" id="dimStep" maxlength="2" size="2" value="50">
+        <input type="text" placeholder="Action" id="dimAction" maxlength="3" size="3" >		
+        
+        <button id="b5">create</button>
+        <button id="b5_1">edit</button>
+      </div>
+      </div> 
+      <br> 
+      <div style="visibility: hidden; margin-top: -48px;float:left;width:100%;" name="slider"  id="slider">
+      <input type="text" id="sldName"  placeholder="Beschreibung" maxlength="16" size="15" >
+      <select name="elementBild" id="ddlslBild"  >
+        <option value="Lampe">Lampe</option>
+        <option value="dose">Steckdose</option>
+        <option value="Luefter">Lüfter</option>
+      </select>
+      <input type="hidden" id="slID" name="slID" value="0">
+      <input type="text" id="sloutCommand"  placeholder="outBefehl" maxlength="15" size="15" >
+      <input type="text" id="sldModul"  placeholder="Modul" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+      <input type="text" id="sldPort"  placeholder="Port" maxlength="2" size="2"  onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+      <input type="text" id="slAction"  placeholder="Aktion" maxlength="15" size="15" >
+      <button id="b3">create</button>
+      <button id="b3_1">edit</button>
+      </div> 
+      <br> 
+      <div style="visibility: hidden;margin-top: -54px;float:left;width:100%;" name="Textfelds"  id="TextFelds">
+      <input type="hidden" id="txtID" name="txtID" value="0">
+      <input type="text" id="tfName"  placeholder="Beschreibung" maxlength="30" size="28" >
+      <input type="text" id="tfCommand"  placeholder="Befehl" maxlength="15" size="15" >
+      <input type="text" id="tfModul"  placeholder="Modul" maxlength="2" size="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+      <input type="text" id="tfNummer"  placeholder="Data Nr." maxlength="2" size="2"  onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+      <select name="elementSize" id="ddltfBild" >
+        <option value="NoImage">--Bild wählen--</option>
+        <option value="WSTemperatur">Temperatur</option>
+        <option value="WSFeuchtigkeit">Feuchtigkeit</option>
+        <option value="WSLuftdruck">Luftdruck</option>
+        <option value="WSWind">Wind</option>
+        <option value="WSBattery">Batterie</option>
+      </select>
+      <button id="b4">create</button>
+      <button id="b4_1">edit</button>
+      </div> 
+    <div hidden id="Lager">
+      <!-- Object Box-->
+      <div class="dragBox draggable">
+        <div class="slides">
+  
+        </div>	
+        <button class="add" on>+</button>
+        <button class="close">x</button>
+      </div>
+      <!-- Object WebButton-->
+      <div class="dragSwitch draggable" ondragstart="dragStart(event)" draggable="true">
+          <span class="WebButton"></span>
+          <button class="close">x</button>
+      </div>
+	        <!-- Object Dimmer-->
+		<div class="dragDimmer draggable" ondragstart="dragStart(event)" draggable="true">
+			<div class="Progress">
+			<span class="WebDimmer"></span>
+			</div>
+			<button class="close">x</button>
+		</div>
+      <!-- Object Slider-->
+      <div class="dragSlider draggable" ondragstart="dragStart(event)" draggable="true">
+        <input type="range" min="0" max="1" value="0" step=".125" class="slider" id="myRange">
+        <button class="close">x</button>
+      </div>
+  
+      <!-- Object Textfeld-->
+      <div class="dragText draggable" ondragstart="dragStart(event)" draggable="true">
+        &nbsp;
+        <div class="Textfeld" id="" >&nbsp;</div>	
+        <button class="close">x</button>
+      </div>
+           <!-- Object SlideContainer-->
+      <div class = "SlideContainer" ondrop="drop(event)" ondragover="allowDrop(event)">
+  
+        <button class="close">x</button>
+      </div>
+    </div>
+  
+  <div class="container">
+    <input type="hidden" id="ID" name="ID" value="0">
+  </div>
+  </div>
+  </div>
+  <div style="overflow:auto;">
+    <div style="float:right;">
+      <button type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
+      <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+    </div>
+  </div>
+
+
+  <!-- Circles which indicates the steps of the form: -->
+  <div style="text-align:center;margin-top:40px;">
+    <span class="step"></span>
+    <span class="step"></span>
+    <span class="step"></span>
+  </div>
+</div>
+
+<script>
+
+function loadDoc() {
+  const xhttp = new XMLHttpRequest();
+  xhttp.onload = function() {
+    document.querySelector(".container").innerHTML = this.responseText;
+  }
+  xhttp.open("GET", "tmp/dashboard.tmp");
+  xhttp.send();
+}
+function loadDoc1() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    
+                    // gets the entire html file of the folder 'logpost' in this case and labels it thing
+                    thing = this.responseText
+                    searchFor = /.html</g
+                    a=0;
+                    b=0;
+                    var str = "";
+            
+                    // greps file for .html and then backs up leter by letter till you hot the file name and all
+                    while ((dothtmls = searchFor.exec(thing)) != null ){
+
+                        str = "";
+                        console.log(dothtmls.index);
+                        
+                        a = dothtmls.index;
+
+                        while (thing[a]  != '>' ){
+                            a--;
+                        }
+                        a++;
+                        while(thing[a] != '<'){
+                            str = str + thing[a];
+                            a++;
+                        }
+                        console.log(str);
+                    } 
+                }
+            };
+            xhttp.open("GET", "content/", true);
+            xhttp.send();
+            }
+
+document.querySelector("#download-file").addEventListener('click', function() {
+  var ddl=document.getElementById("sBenutzer");
+var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            document.querySelector(".container").innerHTML = xhr.responseText;
+        }
+    }
+    xhr.open('GET', 'tmp/'+ddl.value+'.tmp');
+    xhr.send();
+    document.getElementById("message").innerText="Runtergeladen!";    
+});
+
+
+var indx=1;
+var max=0;
+var currentTab = 0; // Current tab is set to be the first tab (0)
+showTab(currentTab); // Display the current tab
+
+function showTab(n) {
+  // This function will display the specified tab of the form ...
+  var x = document.getElementsByClassName("tab");
+  x[n].style.display = "block";
+  // ... and fix the Previous/Next buttons:
+  if (n == 0) {
+    document.getElementById("prevBtn").style.display = "none";
+  } else {
+    document.getElementById("prevBtn").style.display = "inline";
+  }
+  if (n == (x.length - 1)) {
+    document.getElementById("nextBtn").innerHTML = "Ende";
+  } else {
+    document.getElementById("nextBtn").innerHTML = "Next";
+  }
+  // ... and run a function that displays the correct step indicator:
+  fixStepIndicator(n)
+}
+
+
+
+function nextPrev(n) {
+  // This function will figure out which tab to display
+  var x = document.getElementsByClassName("tab");
+  // Exit the function if any field in the current tab is invalid:
+  if (n == 1 && !validateForm()) return false;
+  // Hide the current tab:
+  x[currentTab].style.display = "none";
+  // Increase or decrease the current tab by 1:
+  currentTab = currentTab + n;
+  // if you have reached the end of the form...
+  if (currentTab >= x.length) {
+    // ... the form gets submitted:
+    //document.getElementById("regForm").submit();
+	window.location.href = "/";
+    return false;
+  }
+  // Otherwise, display the correct tab:
+  showTab(currentTab);
+}
+
+function validateForm() {
+  // This function deals with validation of the form fields
+  var x, y, i, valid = true;
+  x = document.getElementsByClassName("tab");
+  y = x[currentTab].getElementsByTagName("input");
+  // A loop that checks every input field in the current tab:
+  for (i = 0; i < y.length; i++) {
+    // If a field is empty...
+    if (y[i].value == "") {
+      // add an "invalid" class to the field:
+      y[i].className += " invalid";
+      // and set the current valid status to false
+      valid = false;
+    }
+  }
+  // If the valid status is true, mark the step as finished and valid:
+  if (valid) {
+    document.getElementsByClassName("step")[currentTab].className += " finish";
+  }
+  return true; // return the valid status
+}
+
+function fixStepIndicator(n) {
+  // This function removes the "active" class of all steps...
+  var i, x = document.getElementsByClassName("step");
+  for (i = 0; i < x.length; i++) {
+    x[i].className = x[i].className.replace(" active", "");
+  }
+  //... and adds the "active" class on the current step:
+  x[n].className += " active";
+}
+function LoadBenutzer(){
+	connectServer();
+
+}
+
+//Function Tab Benutzer
+function HinBenutzer(){
+  console.log(indx);
+
+  var b=document.getElementById("Benutzer");
+  var p=document.getElementById("Password");
+
+  var inputBen =document.createElement("input");
+  inputBen.type="text";
+  inputBen.id="b"+indx;
+  inputBen.value=b.value;
+  inputBen.oninput="this.className";
+
+  var inputPass =document.createElement("input");
+  inputPass.type="password";
+  inputPass.id="p"+indx;
+  inputPass.value=p.value;
+  inputPass.oninput="this.className";
+
+  var inputDel =document.createElement("button");
+  inputDel.type="button";
+  inputDel.id="d"+indx;
+  inputDel.textContent ="delete";
+  var att = document.createAttribute("onclick");
+  att.value = "delBenutzer("+indx+")";
+  inputDel.setAttributeNode(att);
+  //inputDel.oninput="this.className";
+
+  var tableel = document.getElementById("BenTable");
+  var tr = [];
+  var td1 = document.createElement('td');
+  var td2 = document.createElement('td');
+  var td3 = document.createElement('td');
+  tr[indx]=document.createElement('tr');
+
+  td1.appendChild(inputBen);
+  td2.appendChild(inputPass);
+  td3.appendChild(inputDel);
+
+  tr[indx].appendChild(td1);
+  tr[indx].appendChild(td2);
+  tr[indx].appendChild(td3);
+  tableel.appendChild(tr[indx]);
+  max=indx;
+  indx++;
+
+  var x = document.getElementById("sBenutzer");
+  var option = document.createElement("option");
+  option.text = b.value;
+  option.value = b.value;
+  x.add(option);
+}
+
+function delBenutzer(indx){
+if(confirm("Bist du sicher?")){
+  var element1 = document.getElementById("p"+indx);
+  element1.parentNode.removeChild(element1);
+  var element2 = document.getElementById("b"+indx);
+  element2.parentNode.removeChild(element2);
+  var element3 = document.getElementById("d"+indx);
+  element3.parentNode.removeChild(element3);
+  while(indx<max){
+    var i=indx+1;
+    element1 = document.getElementById("p"+i);
+    element2 = document.getElementById("b"+i);
+    element3 = document.getElementById("d"+i);   
+    if(element1 !=null){
+      element1.id="p"+(indx);
+      element2.id="b"+indx;
+      element3.id="d"+indx;
+      element3.setAttribute("onclick", "delBenutzer("+indx+")");
+    }
+    indx++;
+  }
+}
+}
+
+// ******************  Function Tab Dashboard  **************************
+  let id=0;
+	var w=128,h=128;
+	document.addEventListener("DOMContentLoaded", function () {
+	let i = 0,
+	    
+		x0 = 300,
+		y0 = 300;
+		document.querySelector("#b1")
+		.addEventListener("click", function () {
+			let newdiv = document.querySelector("#Lager .dragBox").cloneNode(true);
+			newdiv.style.left = x0 +  "px";
+			newdiv.style.width = w + "px";
+			newdiv.style.height = h + "px";
+            newdiv.style.margin = 0 + "px";
+			newdiv.style.top = y0 + "px";
+			newdiv.style.backgroundColor = favcolor.value;
+			let p = document.createElement('p');
+            p.textContent = document.getElementById("txtBereichName").value;
+			p.className="draggableheader";
+			newdiv.appendChild(p);
+
+			let newsld = document.querySelector("#Lager .SlideContainer").cloneNode(true);
+			newsld.style.left = "0px";
+			newsld.style.width = w + "px";
+			newsld.style.height = h -24 + "px";
+			newsld.style.top = "24px";
+			var sld=newdiv.getElementsByClassName("slides")[0];			
+			sld.appendChild(newsld);
+			document.querySelector(".container").appendChild(newdiv);
+		}, false);
+// create button **************************
+		document.querySelector("#b2")
+		.addEventListener("click", function () {
+			id=document.getElementById("ID").value;
+	        console.log(id);
+			let ID=++id;
+			document.getElementById("ID").value=ID;
+			let newdiv = document.querySelector("#Lager .dragSwitch")
+				.cloneNode(true);
+			newdiv.style.left = x0 +  "px";
+            newdiv.style.margin = 0 + "px";
+			newdiv.style.width = 70 + "px";
+			newdiv.style.top = y0 + "px";
+			let span = document.createElement('span');
+            span.className = document.getElementById("ddlBild").value +" draggableheader";
+			span.id="bild"+ID;
+			let spanLED=document.createElement('span');
+			spanLED.className="led";
+			spanLED.id="led"+ID;
+
+			let LedCmd=  document.getElementById("LedCmd").value;
+			let LedModul=  document.getElementById("LedModul").value;
+			let LedPort=  document.getElementById("LedPort").value;
+			let LedData=  document.getElementById("LedData").value;
+
+			var attLedCmd=document.createAttribute("Data-Cmd");
+			var attLedMA=document.createAttribute("Data-MA");
+			var attLedPort=document.createAttribute("Data-Port");
+			var attLedData=document.createAttribute("Data-Data");
+
+			attLedCmd.value=LedCmd;
+			attLedMA.value=LedModul;
+			attLedPort.value=LedPort;
+			attLedData.value=LedData;
+			spanLED.setAttributeNode(attLedCmd);
+			spanLED.setAttributeNode(attLedMA);
+			spanLED.setAttributeNode(attLedPort);
+			spanLED.setAttributeNode(attLedData);
+
+      		let TextSpan=document.createElement('span');
+      		TextSpan.innerHTML=document.getElementById("btnName").value;
+      		TextSpan.className="btnText";
+      		TextSpan.id="btnText"+ID;
+			
+
+			let btnCmd=  document.getElementById("btnCommand").value;
+			let btnModul=  document.getElementById("btnModul").value;
+			let btnPort=  document.getElementById("btnPort").value;
+			let btnAction=  document.getElementById("btnAction").value;			
+			let p=btnModul+"."+btnPort;
+
+			newdiv.id="buttonHolder"+ID;
+			var att = document.createAttribute("onclick");
+            att.value = "ButtonClick("+ID+")";
+			var attTouch = document.createAttribute("ontouchend");
+            attTouch.value = "ButtonClick("+ID+")";
+			var attAction= document.createAttribute("Data-Action");
+			attAction.value=btnAction;
+			var attCmd= document.createAttribute("Data-Cmd");
+			attCmd.value=btnCmd;
+			var attMA= document.createAttribute("Data-ma");
+			attMA.value = btnModul;
+			var attPin= document.createAttribute("Data-Port");
+			attPin.value= btnPort;
+			var input_element = newdiv.getElementsByClassName("WebButton")[0];
+			input_element.appendChild(spanLED);
+      		input_element.appendChild(TextSpan);
+			input_element.id=ID;
+			input_element.setAttributeNode(att);
+			//input_element.setAttributeNode(attTouch);
+			input_element.setAttributeNode(attMA);
+			input_element.setAttributeNode(attPin);
+			input_element.setAttributeNode(attCmd);
+			input_element.setAttributeNode(attAction);
+
+			newdiv.appendChild(span);
+			document.querySelector(".container").appendChild(newdiv);
+		}, false);
+		//***********************Edit button
+		document.querySelector("#b2_1")
+		.addEventListener("click", function () {
+			var btnID=document.getElementById("btnID").value;
+      var btnText=document.getElementById("btnName").value;
+			var spanEl=document.getElementById("bild"+btnID);
+			if (btnID!=0){
+			var el=document.getElementById(btnID);
+			console.log(el);
+			el.dataset.cmd=document.getElementById("btnCommand").value;
+			el.dataset.moduladresse=document.getElementById("btnModul").value;
+			el.dataset.port=document.getElementById("btnPort").value;
+			el.dataset.Action=document.getElementById("btnAction").value;
+			
+			spanEl.className = document.getElementById("ddlBild").value +" draggableheader";
+			var led=document.getElementById("led"+btnID);
+			led.dataset.cmd=document.getElementById("LedCmd").value;
+			led.dataset.moduladresse=document.getElementById("LedModul").value;
+			led.dataset.port=document.getElementById("LedPort").value;
+			//led.dataset.event=document.getElementById("LedData").value;
+			}
+		}, false);
+
+		// create dimmer **************************
+		document.querySelector("#b5")
+		.addEventListener("click", function () {
+			id=document.getElementById("ID").value;
+	        console.log(id);
+			let ID=++id;
+			document.getElementById("ID").value=ID;
+			let newdiv = document.querySelector("#Lager .dragDimmer")
+				.cloneNode(true);
+			newdiv.style.left = x0 +  "px";
+            newdiv.style.margin = 0 + "px";
+			newdiv.style.width = 70 + "px";
+			newdiv.style.top = y0 + "px";
+			let span = document.createElement('span');
+            span.className = document.getElementById("ddlBild2").value +" draggableheader";
+			span.id="bild"+ID;
+			let spanLED=document.createElement('span');
+			spanLED.className="led";
+			spanLED.id="led"+ID;
+
+			let LedCmd=  document.getElementById("LedCmd2").value;
+			let LedModul=  document.getElementById("LedModul2").value;
+			let LedPort=  document.getElementById("LedPort2").value;
+			let LedData=  document.getElementById("LedData2").value;
+
+			var attLedCmd=document.createAttribute("Data-Cmd");
+			var attLedMA=document.createAttribute("Data-MA");
+			var attLedPort=document.createAttribute("Data-Port");
+			var attLedData=document.createAttribute("Data-Data");
+
+			attLedCmd.value=LedCmd;
+			attLedMA.value=LedModul;
+			attLedPort.value=LedPort;
+			attLedData.value=LedData;
+			spanLED.setAttributeNode(attLedCmd);
+			spanLED.setAttributeNode(attLedMA);
+			spanLED.setAttributeNode(attLedPort);
+			spanLED.setAttributeNode(attLedData);
+
+      		let TextSpan=document.createElement('span');
+      		TextSpan.innerHTML=document.getElementById("dimName").value;
+      		TextSpan.className="dimText";
+      		TextSpan.id="dimText"+ID;
+			
+
+			let btnCmd=  document.getElementById("dimCommand").value;
+			let btnModul=  document.getElementById("dimModul").value;
+			let btnPort=  document.getElementById("dimPort").value;
+			let btnAction=  document.getElementById("dimAction").value;			
+			let p=btnModul+"."+btnPort;
+
+			newdiv.id="dimHolder"+ID;
+			var att = document.createAttribute("onclick");
+            att.value = "DimmerClick("+ID+")";
+			var attAction= document.createAttribute("Data-Action");
+			attAction.value=btnAction;
+			var attCmd= document.createAttribute("Data-Cmd");
+			attCmd.value=btnCmd;
+			var attMA= document.createAttribute("Data-ma");
+			attMA.value = btnModul;
+			var attPin= document.createAttribute("Data-Port");
+			attPin.value= btnPort;
+			var input_element = newdiv.getElementsByClassName("WebDimmer")[0];
+			input_element.appendChild(spanLED);
+      		input_element.appendChild(TextSpan);
+			input_element.id=ID;
+			input_element.setAttributeNode(att);
+			input_element.setAttributeNode(attMA);
+			input_element.setAttributeNode(attPin);
+			input_element.setAttributeNode(attCmd);
+			input_element.setAttributeNode(attAction);
+
+
+
+			var attStep= document.createAttribute("Data-Step");
+				attStep.value=document.getElementById("dimStep").value;
+				newdiv.getElementsByClassName("Progress")[0].style="background: conic-gradient(#FF00FF "+attStep.value +"%, #fff 0)";
+				newdiv.getElementsByClassName("Progress")[0].id="prog"+ID;
+				TextSpan.innerText=document.getElementById("dimStep").value+ "%";
+
+				var attmousedown= document.createAttribute("onmousedown");
+				attmousedown.value="pressingDown("+ID+")";
+
+				var attonwheel= document.createAttribute("onwheel");
+				attonwheel.value="step(event,"+ID+")";
+
+				var attmouseup= document.createAttribute("onmouseup");
+				attmouseup.value="notPressingDown("+ID+")";
+
+				var atttouchstart= document.createAttribute("ontouchstart");
+				atttouchstart.value="pressingDown("+ID+")";
+
+				var atttouchend= document.createAttribute("ontouchend");
+				atttouchend.value="notPressingDown("+ID+")";
+
+				input_element.setAttributeNode(attmousedown);
+				input_element.setAttributeNode(attmouseup);
+				input_element.setAttributeNode(atttouchstart);
+				input_element.setAttributeNode(atttouchend);
+				input_element.setAttributeNode(attonwheel);
+				input_element.setAttributeNode(attStep);
+
+			
+			newdiv.appendChild(span);
+			document.querySelector(".container").appendChild(newdiv);
+		}, false);
+		//***********************Edit Dimmer
+		document.querySelector("#b5_1")
+		.addEventListener("click", function () {
+			var btnID=document.getElementById("dimID").value;
+      var btnText=document.getElementById("dimName").value;
+			var spanEl=document.getElementById("bild"+btnID);
+			if (btnID!=0){
+			var el=document.getElementById(btnID);
+			console.log(el);
+			el.dataset.cmd=document.getElementById("dimCommand").value;
+			el.dataset.moduladresse=document.getElementById("dimModul").value;
+			el.dataset.port=document.getElementById("dimPort").value;
+			el.dataset.Action=document.getElementById("dimAction").value;
+			el.dataset.step=document.getElementById("dimStep").value;
+			
+			spanEl.className = document.getElementById("ddlBild2").value +" draggableheader";
+			var led=document.getElementById("led"+btnID);
+			led.dataset.cmd=document.getElementById("LedCmd").value;
+			led.dataset.moduladresse=document.getElementById("LedModul").value;
+			led.dataset.port=document.getElementById("LedPort").value;
+			//led.dataset.event=document.getElementById("LedData").value;
+			}
+		}, false);
+
+		document.querySelector("#b3")
+		.addEventListener("click", function () {
+			id=document.getElementById("ID").value;
+	        console.log(id);
+			let ID=++id;
+			document.getElementById("ID").value=ID;
+			let newdiv = document.querySelector("#Lager .dragSlider").cloneNode(true);
+			newdiv.style.left = x0 +  "px";
+			newdiv.style.top = y0 + "px";
+			let span = document.createElement('span');
+            span.className = document.getElementById("ddlslBild").value +" draggableheader";
+			span.id="bild"+ID;
+			newdiv.id="Slider"+ID;
+
+			let slAction=  document.getElementById("slAction").value;
+			let sloutCommand=  document.getElementById("sloutCommand").value;
+			let sldModul=  document.getElementById("sldModul").value;
+			let sldPort=  document.getElementById("sldPort").value;
+			let p=sldModul+"."+sldPort;
+
+			var att = document.createAttribute("onchange");
+            att.value = "slOnChange("+ID+")";
+			var attAction=document.createAttribute("Data-Action");
+			attAction.value=slAction;
+			var attoutCmd= document.createAttribute("Data-Cmd");
+			attoutCmd.value=sloutCommand;
+			var attMA= document.createAttribute("Data-MA");
+			attMA.value = sldModul;
+			var attPin= document.createAttribute("Data-Port");
+			attPin.value= sldPort;
+
+			var input_element = newdiv.getElementsByClassName("slider")[0];
+			input_element.id=ID;//"sld"+p;
+			input_element.setAttributeNode(att);
+			input_element.setAttributeNode(attMA);
+			input_element.setAttributeNode(attPin);
+			input_element.setAttributeNode(attAction);
+			input_element.setAttributeNode(attoutCmd);
+			newdiv.appendChild(span);
+			document.querySelector(".container").appendChild(newdiv);
+		}, false);
+		document.querySelector("#b3_1")
+		.addEventListener("click", function () {
+			var slID=document.getElementById("slID").value;
+			var spanEl=document.getElementById("bild"+slID);
+			if (slID!=0){
+			var el=document.getElementById(slID);
+			//console.log(el);
+			el.dataset.Action=document.getElementById("slAction").value;
+			el.dataset.outcmd=document.getElementById("sloutCommand").value;
+			el.dataset.moduladresse=document.getElementById("sldModul").value;
+			el.dataset.port=document.getElementById("sldPort").value;
+			spanEl.className = document.getElementById("ddlslBild").value +" draggableheader";
+			}
+		}, false);
+
+		document.querySelector("#b4")
+		.addEventListener("click", function () {
+			id=document.getElementById("ID").value;
+	        console.log(id);
+			var ID=++id;
+			document.getElementById("ID").value=ID;
+			let newdiv = document.querySelector("#Lager .dragText")
+				.cloneNode(true);
+			newdiv.style.left = x0 +  "px";
+			newdiv.style.top = y0 + "px";
+			let span = document.createElement('span');
+            span.className = document.getElementById("ddltfBild").value +" draggableheader";
+			span.id="bild"+ID;
+			let tfName=  document.getElementById("tfName").value;
+			let tfModul=  document.getElementById("tfModul").value;
+			let tfFeldnummer=  document.getElementById("tfNummer").value;
+			let tfCmd=  document.getElementById("tfCommand").value;
+			var txt_element = newdiv.getElementsByClassName("Textfeld")[0];
+			newdiv.id="tf"+ID;
+			txt_element.innerText=tfName;
+			txt_element.id=ID;
+			var att = document.createAttribute("onclick");
+            att.value = "txtClick("+ID+")";
+			var attinCmd= document.createAttribute("Data-Action");
+			attinCmd.value=tfCmd;
+			var attMA= document.createAttribute("Data-MA");
+			attMA.value = tfModul;
+			var attPin= document.createAttribute("Data-Port");
+			attPin.value= tfFeldnummer;	
+			txt_element.setAttributeNode(att);
+			txt_element.setAttributeNode(attMA);
+			txt_element.setAttributeNode(attPin);
+			txt_element.setAttributeNode(attinCmd);
+			newdiv.appendChild(span);
+			document.querySelector(".container").appendChild(newdiv);
+		}, false);
+		document.querySelector("#b4_1")
+		.addEventListener("click", function () {
+			var txtID=document.getElementById("txtID").value;
+			var spanEl=document.getElementById("bild"+txtID);
+			if (txtID!=0){
+			var el=document.getElementById(txtID);
+			//console.log(el);
+			el.dataset.incmd=document.getElementById("tfCommand").value;
+			el.dataset.moduladresse=document.getElementById("tfModul").value;
+			el.dataset.port=document.getElementById("tfNummer").value;
+			spanEl.className = document.getElementById("ddltfBild").value +" draggableheader";}
+		}, false);
+
+		document.body.addEventListener("click", function (e) {
+		if (e.target.classList && e.target.classList.contains("close")) e.target.parentNode
+			.parentNode.removeChild(e.target.parentNode);
+	}, false);
+		document.body.addEventListener("click", function (e) {
+		if (e.target.classList && e.target.classList.contains("add")) {
+			let newdiv = document.querySelector("#Lager .SlideContainer").cloneNode(true);
+			var bx=e.target.parentNode;
+			var sld=e.target.parentNode.getElementsByClassName("slides")[0];
+			newdiv.style.left = "0px";
+			newdiv.style.width = bx.style.width;
+			newdiv.style.height = bx.style.height.replace("px","")-24 +"px";
+			newdiv.style.top = "24px";			
+			sld.appendChild(newdiv);
+		}
+	}, false);
+}, false);
+
+// drag_n_drop.js
+// 6. 1. 2021
+// Alle Elemente mit der Klasse "draggable" werden verschiebbar gemacht
+document.addEventListener("DOMContentLoaded", function () {
+	"use strict"
+	// Klasse für verschiebbare Elemente
+	const drag_class = "draggableheader";
+	// Prüfen, welche Eventmodelle unterstützt werden und welches verwendet werden soll
+	const pointer_event = ("PointerEvent" in window);
+	const touch_event = ("TouchEvent" in window) && !pointer_event;
+	// Einige Variablen
+	let pos0; // Pointerposition bei down
+	let start; // Position des Dragobjekts bei down
+	let zmax = 1000; // Start z-Index für die Dragelemente, muss evtl. angepasst werden
+	let dragele = null; // Das aktuelle Dragelement
+	// Bestimmen der Pointerposition
+	function get_pointer_pos(e) {
+			let posx = 0,
+				posy = 0;
+			if (touch_event && e.targetTouches && e.targetTouches[0] && e.targetTouches[0].clientX) {
+				posx = e.targetTouches[0].clientX;
+				posy = e.targetTouches[0].clientY;
+			} else if (e.clientX) {
+				posx = e.clientX;
+				posy = e.clientY;
+			}
+			return {
+				x: posx,
+				y: posy
+			};
+		} // get_pointer_pos
+		//Eventhandler für pointerdown, touchstart oder mousedown
+	function handle_down(e) {
+			const pos = get_pointer_pos(e);
+			down(e, pos);
+		} // handle_	down
+		//Eventhandler für pointermove, touchmove oder mousemove
+	function handle_move(e) {
+			const pos = get_pointer_pos(e);
+			move(e, pos);
+		} // handle_move
+		//Eventhandler für pointerup, touchend oder mouseup
+	function handle_up(e) {
+			up(e);
+		} // handle_up
+		
+		// Auswahl des Dragelements und Start der Dragaktion
+	     function down(e, pos) {
+			const target = parent(e.target, drag_class);
+			if (target) {
+				document.body.style.touchAction = "none";
+				e.preventDefault();
+				dragele = target;
+				start = {
+					x: dragele.parentElement.offsetLeft,
+					y: dragele.parentElement.offsetTop
+				};
+				pos0 = pos;
+				dragele.parentElement.style.zIndex = ++zmax;
+				dragele.parentElement.focus();
+			}
+		} // down
+		// Bewegen des Dragelements
+	function move(e, pos) {
+			if (dragele) {
+				e.preventDefault();
+            dragele.parentElement.style.left = Math.round((start.x + pos.x - pos0.x)/4)*4 + "px";
+				dragele.parentElement.style.top = Math.round((start.y + pos.y - pos0.y)/4)*4 + "px";
+			}
+		} // move
+		// Ende der Aktion
+	function up(e) {
+			if (dragele) {
+                dragele = null;
+				document.body.style.touchAction = "auto";
+			}
+		} // up
+
+		// Dragbares Element mit Tab-Index für die Fokussierbarkeit und Eventhandler für Unterdrückung der Standardaktion versehen
+	function finish(ele) {
+			ele.tabIndex = 0;
+			if (!pointer_event) {
+				ele.addEventListener("touchmove", function(e) {
+					e.preventDefault()
+				}, false);
+			}
+		} // finish
+		// Vorfahrenelement mit Klasse classname suchen
+	function parent(child, classname) {
+		     
+			if (child && "closest" in child) return child.closest("." + classname);
+			let ele = child;
+			while (ele) {
+				if (ele.classList && ele.classList.contains(classname)) {document.getElementById("p1Text").innerText=ele;return ele;}
+				else {ele = ele.parentElement;document.getElementById("p1Text").innerText=ele;}
+			}
+			return null;
+		} // parent
+		// Alle Eventhandler notieren
+	if (pointer_event) {
+		document.body.addEventListener("pointerdown", handle_down, false);
+		document.body.addEventListener("pointermove", handle_move, false);
+		document.body.addEventListener("pointerup", handle_up, false);
+	} else if (touch_event) {
+		document.body.addEventListener("touchstart", handle_down, false);
+		document.body.addEventListener("touchmove", handle_move, false);
+		document.body.addEventListener("touchend", handle_up, false);
+	} else {
+		document.body.addEventListener("mousedown", handle_down, false);
+		document.body.addEventListener("mousemove", handle_move, false);
+		document.body.addEventListener("mouseup", handle_up, false);
+	}
+		// finish für alle verschiebbaren Elemente aufrufen
+	const draggable = document.querySelectorAll("." + drag_class);
+	for (let i = 0; i < draggable.length; i++) {
+		finish(draggable[i]);
+	}
+	// css-Angaben für die Bedienbarkeit
+	const style = document.createElement('style');
+	style.innerText = "." + drag_class + ":focus { outline: 2px solid blue; } " +
+		"." + drag_class +
+		" { position: absolute; cursor: move; touch-action: manipulation;top:0px; } ";
+	document.head.appendChild(style);
+	// finish für nachträglich erzeugte verschiebbare Elemente aufrufen
+	new MutationObserver(function (mutationsList) {
+			for (let i = 0; i < mutationsList.length; i++) {
+				if (mutationsList[i].type === 'childList') {
+					for (let j = 0; j < mutationsList[i].addedNodes.length; j++) {
+						if (mutationsList[i].addedNodes[j].classList && mutationsList[i].addedNodes[
+								j].classList.contains(drag_class)) {
+							finish(mutationsList[i].addedNodes[j]);
+						}
+					}
+				}
+			}
+		})
+		.observe(document.body, {
+			childList: true,
+			subtree: true
+		});
+}, false); // DOMContentLoaded
+// Ende drag_n_drop.js
+
+function onElementChange(){
+	switch (document.getElementById("ddlElements").value) {
+      case 'box' :
+	  document.getElementById("Boxes1").style.visibility="visible";  ;
+	  document.getElementById("button").style.visibility="hidden";  ;
+	  document.getElementById("slider").style.visibility="hidden";  ;
+	  document.getElementById("TextFelds").style.visibility="hidden";  ;
+	  document.getElementById("dimmer").style.visibility="hidden";  ;
+         break;
+		 case 'button' :
+	  document.getElementById("Boxes1").style.visibility="hidden";  ;
+	  document.getElementById("button").style.visibility="visible";  ;
+	  document.getElementById("slider").style.visibility="hidden";  ;
+	  document.getElementById("TextFelds").style.visibility="hidden";  ;
+	  document.getElementById("dimmer").style.visibility="hidden";  ;
+         break;
+		 case 'dimmer' :
+	  document.getElementById("Boxes1").style.visibility="hidden";  ;
+	  document.getElementById("button").style.visibility="hidden";  ;
+	  document.getElementById("slider").style.visibility="hidden";  ;
+	  document.getElementById("TextFelds").style.visibility="hidden";  ;
+	  document.getElementById("dimmer").style.visibility="visible";  ;
+         break;
+		 case 'slider' :
+	  document.getElementById("Boxes1").style.visibility="hidden";  ;
+	  document.getElementById("button").style.visibility="hidden";  ;
+	  document.getElementById("slider").style.visibility="visible";  ;
+	  document.getElementById("TextFelds").style.visibility="hidden";  ;
+	  document.getElementById("dimmer").style.visibility="hidden";  ;
+
+	  break;
+	  case 'tf' :
+	  document.getElementById("Boxes1").style.visibility="hidden";  ;
+	  document.getElementById("button").style.visibility="hidden";  ;
+	  document.getElementById("slider").style.visibility="hidden";  ;
+	  document.getElementById("TextFelds").style.visibility="visible";  ;
+	  document.getElementById("dimmer").style.visibility="hidden";  ;
+	  break;
+      default:
+	  document.getElementById("Boxes1").style.visibility="hidden";  ;
+	  document.getElementById("button").style.visibility="hidden";  ;
+	  document.getElementById("slider").style.visibility="hidden";  ;
+	  document.getElementById("TextFelds").style.visibility="hidden";  ;
+	  document.getElementById("dimmer").style.visibility="hidden";  ;
+
+   }
+}
+function onSizeChange(){
+	switch (document.getElementById("ddlElementSize").value) {
+      case '128x128' :
+    		h=128;w=128;
+         break;
+		 case '128x256' :
+		 	h=128;w=260;
+         break;
+		 case '256x128' :
+		 	h=260;w=128;
+         break;
+		 case '256x256':
+			 h=260;w=260;
+   }
+}
+function SavetoFile() {
+  //console.log(document.querySelector(".container").cloneNode(true));
+  var ddl=document.getElementById("sBenutzer");
+  let list = document.querySelector(".container").cloneNode(true);
+  //var a = document.getElementById("a");
+  //var file = new Blob([list.innerHTML], {"type": "application/json"});
+  //a.href = URL.createObjectURL(file);
+  //a.download = "dashboard.tmp";
+  var blob = new Blob([list.innerHTML], { type: "text/plain" });
+			var formData = new FormData();
+			formData.append("file", blob, "tmp/"+ddl.value+".tmp");
+			fetch("/upload", {method: "POST", body: formData})
+				.then((response) => response.text())
+				.then((responseText) => {
+   				//console.log(responseText);
+   				document.getElementById("message").innerText="Runtergeladen!";  
+			}).catch(function(error) {
+        document.getElementById("message").innerText=error;
+    });			
+
+}
+/*function ReadFromFile(){
+	var fr=new FileReader();
+	fr.onload=function(){
+		document.querySelector("container").innerHTML=fr.result;
+            }
+	fr.readAsText(document.getElementById("fOpen").files[0]);
+}*/
+
+function dragStart(event) {
+  event.dataTransfer.setData("Text", event.target.id);
+  //document.querySelector("textarea").innerHTML=event.target.id;
+}
+
+function allowDrop(event) {
+  event.preventDefault();
+}
+
+function drop(event) {
+  	event.preventDefault();
+  	var data = event.dataTransfer.getData("Text");
+  	var el=document.getElementById(data);
+	el.style.left = 30+  "px";
+	el.style.top = 65 + "px";
+  	event.target.appendChild(el);
+}
+
+function ButtonClick(e){
+	var el=document.getElementById(e);
+	var led=document.getElementById("led"+e)
+	var bildEl=document.getElementById("bild"+e);
+  var btnName=document.getElementById("btnText"+e);
+
+  document.getElementById("btnName").value=btnName.innerHTML;
+	document.getElementById("LedCmd").value=led.dataset.cmd;
+	document.getElementById("LedModul").value=led.dataset.ma;
+	document.getElementById("LedPort").value=led.dataset.port;
+	document.getElementById("LedData").value=led.dataset.data;
+
+	document.getElementById("btnCommand").value=el.dataset.cmd;
+	document.getElementById("btnModul").value=el.dataset.ma;
+	document.getElementById("btnPort").value=el.dataset.port;
+	document.getElementById("btnAction").value=el.dataset.action;
+
+	document.getElementById("btnID").value=e;
+	var classes=bildEl.className;  
+	var res = classes.split(" ");
+	document.getElementById("ddlBild").value=res[0];
+	//console.log(res[0]);
+
+}
+function DimmerClick(e){
+	var el=document.getElementById(e);
+	var led=document.getElementById("led"+e)
+	var bildEl=document.getElementById("bild"+e);
+  var btnName=document.getElementById("dimText"+e);
+
+  document.getElementById("dimName").value=btnName.innerHTML;
+	document.getElementById("LedCmd2").value=led.dataset.cmd;
+	document.getElementById("LedModul2").value=led.dataset.ma;
+	document.getElementById("LedPort2").value=led.dataset.port;
+	document.getElementById("LedData2").value=led.dataset.data;
+
+	document.getElementById("dimCommand").value=el.dataset.cmd;
+	document.getElementById("dimModul").value=el.dataset.ma;
+	document.getElementById("dimPort").value=el.dataset.port;
+	document.getElementById("dimAction").value=el.dataset.action;
+
+	document.getElementById("dimID").value=e;
+	var classes=bildEl.className;  
+	var res = classes.split(" ");
+	document.getElementById("ddlBild2").value=res[0];
+	//console.log(res[0]);
+
+}
+function txtClick(e){
+	var el=document.getElementById(e);
+	var bildEl=document.getElementById("bild"+e);
+	document.getElementById("tfCommand").value=el.dataset.incmd;
+	document.getElementById("tfModul").value=el.dataset.moduladresse;
+	document.getElementById("tfNummer").value=el.dataset.port;
+	document.getElementById("txtID").value=e;
+	var classes=bildEl.className;  
+	var res = classes.split(" ");
+	document.getElementById("ddltfBild").value=res[0];
+	//console.log(res[0]);
+
+}
+function slOnChange(e){
+	var el=document.getElementById(e);
+	console.log(el);
+	var bildEl=document.getElementById("bild"+e);
+	console.log(el.dataset.Action);
+	document.getElementById("slAction").value=el.dataset.Action;
+	document.getElementById("sloutCommand").value=el.dataset.outcmd;
+	document.getElementById("sldModul").value=el.dataset.moduladresse;
+	document.getElementById("sldPort").value=el.dataset.port;
+	document.getElementById("slID").value=e;
+	var classes=bildEl.className;  
+	var res = classes.split(" ");
+	document.getElementById("ddlslBild").value=res[0];
+}
+
+        var ws;
+        function connectServer() {
+            ws = new WebSocket('ws://'+window.location.hostname+'/ws');
+			//ws = new WebSocket('ws://'+document.location.host+'/ws',['arduino']);
+            ws.onopen = function() {
+                //alert("Connected.")
+ 				ws.send(JSON.stringify({ Cmd: "Ben"}));
+            };
+            ws.onmessage = function(event) {
+              console.log("e.msg: "+event.data);
+			  var json=event.data;
+			  var obj;
+			  var cmd;
+			  var user;
+			  var pass;
+			try {
+				obj = JSON.parse(json);
+				} catch (e) {}
+				try {
+			cmd= obj.Cmd;
+				} catch(e){}  
+				try {
+			user= obj.user;
+				} catch(e){}  
+				try {
+			pass= obj.pass;
+				} catch(e){}  
+				if(cmd=="Benn"){
+
+var inputBen =document.createElement("input");
+  inputBen.type="text";
+  inputBen.id="b"+indx;
+  inputBen.value=user;
+  inputBen.oninput="this.className";
+
+  var inputPass =document.createElement("input");
+  inputPass.type="password";
+  inputPass.id="p"+indx;
+  inputPass.value=pass;
+  inputPass.oninput="this.className";
+
+  var inputDel =document.createElement("button");
+  inputDel.type="button";
+  inputDel.id="d"+indx;
+  inputDel.textContent ="delete";
+  var att = document.createAttribute("onclick");
+  att.value = "delBenutzer("+indx+")";
+  inputDel.setAttributeNode(att);
+  //inputDel.oninput="this.className";
+
+  var tableel = document.getElementById("BenTable");
+  var tr = [];
+  var td1 = document.createElement('td');
+  var td2 = document.createElement('td');
+  var td3 = document.createElement('td');
+  tr[indx]=document.createElement('tr');
+
+  td1.appendChild(inputBen);
+  td2.appendChild(inputPass);
+  td3.appendChild(inputDel);
+
+  tr[indx].appendChild(td1);
+  tr[indx].appendChild(td2);
+  tr[indx].appendChild(td3);
+  tableel.appendChild(tr[indx]);
+  max=indx;
+  indx++;
+
+  var x = document.getElementById("sBenutzer");
+  var option = document.createElement("option");
+  option.text = user;
+  option.value = user;
+  x.add(option);		  
+}
+            }
+            ws.onclose = function() {
+              alert("Connection is closed...");
+            };
+            ws.onerror = function(e) {
+              console.log(event.data);
+            }
+        }
+
+
+      function sendFile() {
+//Rohr HTML Hochladen
+      var ddl=document.getElementById("sBenutzer");
+      console.log(ddl.value);
+      if(ddl.value!=""){
+        try{
+        console.log(document.querySelector(".container").cloneNode(true));
+        let list = document.querySelector(".container").cloneNode(true);
+        var blob = new Blob([list.innerHTML], { type: "text/plain" });
+			  var formData = new FormData();
+
+			  formData.append("file", blob, "tmp/"+ddl.value +".tmp");
+			  fetch("/upload", {method: "POST", body: formData})
+				.then((response) => response.text())
+				.then((responseText) => {
+   				//console.log(responseText);
+			  });			
+
+//nur Content HTML Hochladen
+
+
+			list = document.querySelector(".container").cloneNode(true);
+			var box, i, j, l;
+		    box = list.querySelectorAll(".draggable");
+  			for (i = 0; i < box.length; i++) {
+				var btnClose = box[i].querySelectorAll(".close");
+				for(j = 0; j < btnClose.length; j++){
+
+       		 	btnClose[j].remove();
+				}
+				var btnAdd = box[i].querySelectorAll(".add");
+				for(l = 0; l < btnAdd.length; l++){
+					btnAdd[l].remove();
+				}
+				var SlideContainer = box[i].querySelectorAll(".SlideContainer");
+				for(l = 0; l < SlideContainer.length; l++){
+					SlideContainer[l].removeAttribute("ondrop");
+					SlideContainer[l].removeAttribute("ondragover");
+				}
+ 			}
+			//console.log(myTrim(list.innerHTML));
+			var blob = new Blob([myTrim(list.innerHTML)], { type: "text/plain" });
+			var formData = new FormData();
+			formData.append("file", blob, "content/"+ddl.value +".html");
+			fetch("/upload", {method: "POST", body: formData})
+				.then((response) => response.text())
+				.then((responseText) => {
+   				//console.log(responseText);
+           document.getElementById("message").innerText="Hochgeladen!";    
+			});	
+    }catch(err){
+      document.getElementById("message").innerText=err.message;
+    }  		
+    }else{document.getElementById("message").innerText="Wählen Sie einen Benutzer!"}
+  }
+		function myTrim(x) {
+  			return x.replace(/^\s+|\s+$/gm,'');
+		}
+
+
+		function pressingDown(){}
+		function notPressingDown(){}
+
+</script>
+
+</body>
+</html>
